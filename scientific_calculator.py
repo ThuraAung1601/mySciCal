@@ -3,7 +3,7 @@
 For Year 1, Semester 1
 Project: SciCal:Scientific Calculator Development
 Author: Thura Aung (66011606@kmitl.ac.th)
-Repository: 
+Repository: https://github.com/ThuraAung1601/mySciCal/blob/main/scientific_calculator.py
 '''
 import sys
 import subprocess
