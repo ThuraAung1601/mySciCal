@@ -1,8 +1,9 @@
 '''
+01286121 Computer Programming, Software Engineering Program
 For Year 1, Semester 1
 Project: SciCal:Scientific Calculator Development
 Author: Thura Aung (66011606@kmitl.ac.th)
-Repository: https://github.com/ThuraAung1601/mySciCal
+Repository: 
 '''
 import sys
 import subprocess
@@ -159,12 +160,13 @@ class Operations(object):
         equation = equation.replace('^', '**')
 
         try:
-            return eval(equation)
-        except:
             if "x" in equation:
-                return "Equations: Only for Graph"
+                messagebox.showerror("Error", "Equations cannot be solved.")
+                return ""
             else:
-                return "Error: Cannot be calculated."
+                return eval(equation)
+        except:
+            return "Error: Cannot be calculated."
             
     @staticmethod
     def log_value(value):
@@ -647,8 +649,8 @@ class UnitConverter(CalculatorInterface, BackEnd):
         self.input_label.grid(row = 0, column = 0, padx = 20, pady = 20, sticky = NSEW)  
         self.output_label.grid(row = 1, column = 0, padx = 20, pady = 20, sticky = NSEW)  
 
-        self.input_field = Entry(self.bottom_frame, bg="#e8f8f5")
-        self.output_field = Entry(self.bottom_frame, bg="#e8f8f5")
+        self.input_field = Entry(self.bottom_frame, bg="#e8f8f5", fg=self.colors['dark_grey'])
+        self.output_field = Entry(self.bottom_frame, bg="#e8f8f5", fg=self.colors['dark_grey'])
         self.input_field.grid(row=0, column=1)
         self.output_field.grid(row=1, column=1)
 
@@ -675,7 +677,7 @@ class UnitConverter(CalculatorInterface, BackEnd):
                 elif button_text == "OK":
                     button.config(command=lambda x=button_text: self.convert())
                 elif button_text == "←":
-                    button.config(command=lambda x=button_text: self.delete_character(x))
+                    button.config(command=lambda x=button_text: self.delete_character())
 
                 button.grid(row=i, column=j, sticky=NSEW, padx=4, pady=4)
         
@@ -722,11 +724,20 @@ class UnitConverter(CalculatorInterface, BackEnd):
             else:  
                 self.output_field.delete(0, END)  
                 self.output_field.insert(0, round(inputVal * self.unitDict[input_unit] / self.unitDict[output_unit], 5))  
-    
+
+        elif input_unit == self.SELECTIONS[0] or output_unit == self.SELECTIONS[0]:
+            if input_unit == self.SELECTIONS[0]:
+                # displaying error if units are of different types  
+                self.output_field.delete(0, END)  
+                messagebox.showwarning("Warning", "Give the input unit type.")
+            else:
+                # displaying error if units are of different types  
+                self.output_field.delete(0, END)  
+                messagebox.showwarning("Warning", "Give the output unit type.")
         else:  
             # displaying error if units are of different types  
             self.output_field.delete(0, END)  
-            self.output_field.insert(0, "Error: Units are different types.")  
+            messagebox.showerror("Error", f"{input_unit} and {output_unit} are different types.")
         
         # Append conversion details to the history list
         history_entry = f"{inputVal} {input_unit} = {self.output_field.get()} {output_unit}\n"
@@ -940,15 +951,15 @@ class App(CalculatorInterface, BackEnd):
                 # Evaluate the expression for each x value
                 y_values = [self.equation_solver(expression.replace('x', str(x))) for x in x_values]
                 # Plot the graph
-                plt.plot(x_values, y_values)
-                plt.title("Graph of " + expression)
+                plt.plot(x_values, y_values, label=expression)
                 plt.xlabel("x")
                 plt.ylabel("y")
                 plt.grid(True)
+                plt.legend()  # Set legend
                 plt.show()
             except Exception as e:
-                print(f"Error during graphing: {e}")
-
+                messagebox.showerror("Error", f"Error during graphing: {e}")
+        
     def show_history(self):
             # Create a new window for history
             history_window = Toplevel(self.w)
@@ -1129,7 +1140,7 @@ class App(CalculatorInterface, BackEnd):
                     b.grid(row=i, column=j, sticky=NSEW, padx=4, pady=4)
         
             self.bf_buttons.append(row)
-        # print(self.buttons)
+        
         self.w.bind('<Return>', lambda event, a='=': self.send_press(a))
         self.w.bind('<BackSpace>', lambda event, a='backspace': self.send_press(a))
         self.w.bind('<Delete>', lambda event, a='C': self.send_press(a))
