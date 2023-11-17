@@ -1,18 +1,62 @@
+# utils.py
 from tkinter import StringVar
 import math
 
 def is_number(value):
+    """
+    Checks if the given value is a number (integer or float).
+
+    Args:
+        value (str): The input value to be checked.
+
+    Returns:
+        bool: True if the input value is a number, False otherwise.
+    """
     if value.isdecimal() or (value.count('.') == 1 and value.replace('.', '').isdecimal()):
         return True
     return False
 
 def decimal2Scientific(value):
+    """
+    Converts a decimal value into scientific notation.
+
+    Args:
+        value (float/int): The decimal value to be converted.
+
+    Returns:
+        str/float/int: The value in scientific notation or the original value if conversion is not needed.
+    """
     if len(str(int(value))) > 1:
         prefix = value / (10 ** (len(str(int(value))) - 1))
         return f"{prefix}E{len(str(int(value)))-1}"
     return value
 
 class Operations(object):
+    """
+    Class Operations performs various mathematical operations and equation solving.
+
+    Attributes:
+        result (int/float): Result of the equation solving operation.
+        deg_or_rad (str): String indicating whether calculations are in degrees or radians.
+
+    Methods:
+        equation_solver: Solves mathematical equations and expressions.
+        log_value: Computes the logarithm of a given value.
+        ln_value: Computes the natural logarithm of a given value.
+        factorial_value: Computes the factorial of a given value.
+        squareRoot_value: Computes the square root of a given value.
+        absolute_value: Computes the absolute value of a given value.
+        ceil_value: Computes the ceiling value of a given value.
+        floor_value: Computes the floor value of a given value.
+        radian_converter: Converts an angle from degrees to radians.
+        degree_converter: Converts an angle from radians to degrees.
+        sin_value: Computes the sine of a given angle.
+        cos_value: Computes the cosine of a given angle.
+        tan_value: Computes the tangent of a given angle.
+        asin_value: Computes the arcsine of a given angle.
+        acos_value: Computes the arccosine of a given angle.
+        atan_value: Computes the arctangent of a given angle.
+    """
     def __init__(self):
         self.result = 0
         self.deg_or_rad = 'radian'
@@ -105,7 +149,6 @@ class Operations(object):
             return math.sin(self.radian_converter(angle))
         return math.sin(angle)
 
-    
     def cos_value(self, angle):
         if self.deg_or_rad == 'degree':
             return math.cos(self.radian_converter(angle))
@@ -132,6 +175,28 @@ class Operations(object):
         return math.atan(angle)
     
 class BackEnd(Operations):
+    """
+    Class BackEnd handles the back-end operations of the scientific calculator.
+
+    Attributes:
+        ops (list): List of mathematical operators.
+        nums (str): String containing numeric characters.
+        funcs (list): List of mathematical functions.
+        allow_operator (bool): Control the input of mathematical operators.
+        allow_constants (bool): Manage the input of specific mathematical constants.
+        allow_any (bool): Control the ability to input any character.
+        angle_unit (StringVar): String variable to store the angle unit.
+        cursor (int): Cursor position for display text.
+        display_text (list): List containing the text displayed in the calculator.
+        textvar (StringVar): String variable used for the calculator's display.
+
+    Methods:
+        operator_counter: Counts the number of operators in the expression.
+        append_char: Appends characters to the display in the calculator.
+        clear_text: Clears the displayed text and resets parameters.
+        backspace_text: Handles the backspace action for deleting characters.
+        send_press: Handles the button presses and performs respective actions.
+    """
     def __init__(self):
         Operations.__init__(self)
 
