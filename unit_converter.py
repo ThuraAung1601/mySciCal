@@ -1,14 +1,49 @@
+# unit_converter.py
 from tkinter import *
 from tkinter import messagebox
 from utils import BackEnd
 
-light_grey = "#B8B8B8"
-dark_grey = "#535353"
-
 class UnitConverter(BackEnd):
+    """
+    A class implementing unit conversion via a graphical user interface (GUI).
+
+    Inherits from BackEnd class to utilize conversion methods.
+
+    Attributes:
+    - root (Tk): The root Tkinter instance for the GUI.
+    - colors (dict): Dictionary containing color codes for GUI elements.
+    - unitDict (dict): Dictionary of conversion factors for different units.
+    - length_units (list): List of length-related unit types.
+    - temperature_units (list): List of temperature-related unit types.
+    - area_units (list): List of area-related unit types.
+    - volume_units (list): List of volume-related unit types.
+    - weight_units (list): List of weight-related unit types.
+    - SELECTIONS (list): List of unit selections for the GUI dropdown menu.
+    - buttons (list): List containing buttons layout for the GUI.
+
+    Methods:
+    - __init__(self, root): Constructor method initializing the GUI and variables.
+    - create_gui(self): Creates the graphical user interface.
+    - create_buttons(self): Generates buttons for the GUI layout for user input.
+    - display_about(self): Displays information about the Unit Converter.
+    - reset(self): Resets the input and output fields and clears the history.
+    - convert(self): Performs unit conversion based on user input and selected units.
+    - add_digit(self, digit): Appends a digit to the input field.
+    - delete_character(self): Deletes the last character from the input field.
+    - update_history(self): Updates the conversion history displayed in the GUI.
+    - load_conversion_history(self): Loads conversion history from a file.
+    - save_conversion_history(self): Saves conversion history to a file.
+    - show_history(self): Displays conversion history in a new window.
+    """
     def __init__(self, root):
         BackEnd.__init__(self)
         self.root = root
+
+        self.colors = {
+            "light_grey": "#B8B8B8",
+            "dark_grey": "#535353",
+        }
+
         # dictionary of conversion factors  
         self.unitDict = {  
             "millimeter" : 0.001,  
@@ -105,21 +140,40 @@ class UnitConverter(BackEnd):
 
         self.create_gui()
 
+        self.conversion_history = []
+        self.load_conversion_history()
+
+        self.history_text = Text(self.root, wrap=WORD)
+        self.history_text.grid(row=2, column=0, padx=10, pady=10, columnspan=4)
+        self.history_text.config(state=DISABLED)
+
     def create_gui(self):
         self.root.title("Unit Converter")
         self.root.geometry("450x320")
         self.root.resizable(False, False)
-        self.root.configure(bg=light_grey)
+        self.root.configure(bg=self.colors["light_grey"])
 
-        self.top_frame = Frame(self.root, bg=light_grey)
+        self.top_frame = Frame(self.root, bg=self.colors["light_grey"])
         self.top_frame.grid(row=0, column=0, sticky=NSEW)
         
-        self.about = Button(self.top_frame, text="ABOUT", bg=light_grey, fg=dark_grey, font=("Segoe UI", 14, 'bold'), borderwidth=3, padx=4, command=self.display_about)
-        self.reset_button = Button(self.top_frame, text="RESET", bg=light_grey, fg=dark_grey, font=("Segoe UI", 14, 'bold'), borderwidth=3, padx=4, command=self.reset)
+        self.about = Button(self.top_frame, text="ABOUT", bg=self.colors["light_grey"], fg=self.colors["dark_grey"], font=("Segoe UI", 14, 'bold'), borderwidth=3, padx=4, command=self.display_about)
+        self.reset_button = Button(self.top_frame, text="RESET", bg=self.colors["light_grey"], fg=self.colors["dark_grey"], font=("Segoe UI", 14, 'bold'), borderwidth=3, padx=4, command=self.reset)
         self.about.grid(row=1, column=1)
         self.reset_button.grid(row=1, column=3)
+
+        self.history_button = Button(
+            self.top_frame,
+            text="Show History",
+            bg=self.colors["light_grey"],
+            fg=self.colors["dark_grey"],
+            font=("Segoe UI", 14, 'bold'),
+            borderwidth=3,
+            padx=4,
+            command=self.show_history
+        )
+        self.history_button.grid(row=1, column=2)
         
-        self.bottom_frame = Frame(self.root, bg=light_grey)
+        self.bottom_frame = Frame(self.root, bg=self.colors["light_grey"])
         self.bottom_frame.grid(row=1, column=0, sticky=NSEW)
         
         self.input_value = StringVar()
@@ -131,15 +185,15 @@ class UnitConverter(BackEnd):
         self.input_label = Label(  
             self.bottom_frame,  
             text = "From:",  
-            bg = light_grey,  
-            fg = dark_grey,
+            bg = self.colors["light_grey"],  
+            fg = self.colors["dark_grey"],
             font=("Segoe UI", 14, 'bold')
         )  
         self.output_label = Label(  
             self.bottom_frame,  
             text = "To:",  
-            bg = light_grey,  
-            fg = dark_grey,
+            bg = self.colors["light_grey"],  
+            fg = self.colors["dark_grey"],
             font=("Segoe UI", 14, 'bold')  
         )  
 
@@ -160,13 +214,13 @@ class UnitConverter(BackEnd):
         self.create_buttons()
 
     def create_buttons(self):
-        self.buttons_frame = Frame(self.bottom_frame, bg=dark_grey)
+        self.buttons_frame = Frame(self.bottom_frame, bg=self.colors["dark_grey"])
         for i, row_buttons in enumerate(self.buttons):
             for j, button_text in enumerate(row_buttons):
                 button = Button(
                     self.buttons_frame,
                     text=button_text,
-                    bg=light_grey,
+                    bg=self.colors["light_grey"],
                     borderwidth=3,
                     font=('Segoe UI', 16, 'bold')
                 )
@@ -192,6 +246,11 @@ class UnitConverter(BackEnd):
         self.input_value.set(self.SELECTIONS[0])
         self.output_value.set(self.SELECTIONS[0])
         self.input_field.focus_set()
+
+        # Clear conversion history when resetting
+        self.conversion_history = []
+        self.update_history()
+        self.save_conversion_history()
 
     def convert(self):
         # getting the string from entry field and converting it into float  
@@ -221,7 +280,15 @@ class UnitConverter(BackEnd):
         else:  
             # displaying error if units are of different types  
             self.output_field.delete(0, END)  
-            self.output_field.insert(0, "ERROR")  
+            self.output_field.insert(0, "Error: Units are different types.")  
+        
+        # Append conversion details to the history list
+        history_entry = f"{inputVal} {input_unit} = {self.output_field.get()} {output_unit}\n"
+        self.conversion_history.append(history_entry)
+
+        # Update the conversion history displayed in the Text widget
+        self.update_history()
+        self.save_conversion_history()
 
     def add_digit(self, digit):
         current_value = self.input_field.get()
@@ -230,6 +297,49 @@ class UnitConverter(BackEnd):
     def delete_character(self):
         current_value = self.input_field.get()
         self.input_field.delete(len(current_value) - 1, END)
+
+    def update_history(self):
+        # Clear the history text widget and update it with the latest conversion history
+        self.history_text.delete(1.0, END)
+        for entry in self.conversion_history:
+            self.history_text.insert(END, entry)
+
+    def load_conversion_history(self):
+        try:
+            with open("conversion_history.txt", "r") as file:
+                self.conversion_history = file.readlines()
+        except FileNotFoundError:
+            self.conversion_history = []
+
+    def save_conversion_history(self):
+        with open("conversion_history.txt", "w") as file:
+            file.writelines(self.conversion_history)
+    
+    def show_history(self):
+            # Create a new window for history
+            history_window = Toplevel(self.root)
+            history_window.title("Conversion History")
+            history_window.geometry("400x300")
+            
+            # Read history from the file
+            try:
+                with open('conversion_history.txt', 'r') as history_file:
+                    history_data = history_file.readlines()
+            except FileNotFoundError:
+                history_data = []
+            except Exception as e:
+                # Handle other exceptions with a generic error message
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+            # Display history in a Text widget
+            history_text = Text(history_window, wrap=WORD)
+            history_text.pack(expand=YES, fill=BOTH)
+
+            for entry in history_data:
+                history_text.insert(END, entry)
+
+            # Disable text editing in the history window
+            history_text.config(state=DISABLED)
 
 if __name__ == "__main__":
     root = Tk()
