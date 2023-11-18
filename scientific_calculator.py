@@ -3,7 +3,7 @@
 For Year 1, Semester 1
 Project: SciCal:Scientific Calculator Development
 Author: Thura Aung (66011606@kmitl.ac.th)
-Repository: https://github.com/ThuraAung1601/mySciCal/blob/main/scientific_calculator.py
+Repository: 
 '''
 import sys
 import subprocess
@@ -400,12 +400,13 @@ class BackEnd(Operations):
                     self.allow_operator, self.allow_any, self.allow_constants = False, False, False
                     self.cursor = 0
                 else:
-                    if b >= 10 ** 10000:
-                        self.display_text = ['Overflow']
+                    if b >= 10 ** 1000:
+                        self.display_text = [""]
+                        messagebox.showerror("Error", "Overflow")
                         self.allow_any, self.allow_constants, self.allow_constants = False, False, False
                     else:
-                        if 10 ** 45 <= b < 10 ** 10000:
-                            self.display_text = [str(self.dec_to_e(b))]
+                        if 10 ** 45 <= b < 10 ** 1000:
+                            self.display_text = [str(decimal2Scientific(b))]
                         self.allow_operator, self.allow_any, self.allow_constants = True, False, False
                         self.cursor = 0
 
@@ -1158,7 +1159,6 @@ class App(CalculatorInterface, BackEnd):
 
     def start(self):
         self.w.mainloop()
-
 
 if __name__ == "__main__":
     root = Tk()
