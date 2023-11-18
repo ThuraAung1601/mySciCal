@@ -3,7 +3,7 @@
 For Year 1, Semester 1
 Project: SciCal:Scientific Calculator Development
 Author: Thura Aung (66011606@kmitl.ac.th)
-Repository: 
+Repository: https://github.com/ThuraAung1601/mySciCal/edit/main/scientific_calculator.py
 '''
 import sys
 import subprocess
@@ -166,7 +166,8 @@ class Operations(object):
             else:
                 return eval(equation)
         except:
-            return "Error: Cannot be calculated."
+            messagebox.showerror("Error", "Cannot be calculated.")
+            return ""
             
     @staticmethod
     def log_value(value):
@@ -948,9 +949,9 @@ class App(CalculatorInterface, BackEnd):
                 # Extract the expression from the display text
                 expression = self.textvar.get()
                 # Generate x values
-                x_values = np.linspace(-10, 10, 400)
+                x_values = np.linspace(-100, 100, 100)
                 # Evaluate the expression for each x value
-                y_values = [self.equation_solver(expression.replace('x', str(x))) for x in x_values]
+                y_values = [self.equation_solver(expression.replace('x', "("+str(x)+")")) for x in x_values]
                 # Plot the graph
                 plt.plot(x_values, y_values, label=expression)
                 plt.xlabel("x")
